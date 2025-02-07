@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입 - 여행 플래너</title>
+  <link rel="stylesheet" href="signup.css">
+  <!-- Bootstrap CSS (CDN 사용) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- jQuery (AJAX 요청을 위해 사용) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2>회원가입</h2>
+    <form id="signupForm" method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="signupEmail" class="form-label">이메일</label>
+        <input type="email" class="form-control" id="signupEmail" name="email" required>
+      </div>
+      <div class="mb-3">
+        <label for="signupPassword" class="form-label">비밀번호</label>
+        <input type="password" class="form-control" id="signupPassword" name="password" required>
+      </div>
+      <div class="mb-3">
+        <label for="signupName" class="form-label">이름</label>
+        <input type="text" class="form-control" id="signupName" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="signupBirth" class="form-label">생년월일</label>
+        <input type="date" class="form-control" id="signupBirth" name="birth">
+      </div>
+      <div class="mb-3">
+        <label for="signupAddr" class="form-label">주소</label>
+        <input type="text" class="form-control" id="signupAddr" name="addr">
+      </div>
+      <div class="mb-3">
+        <label for="signupPhone" class="form-label">전화번호</label>
+        <input type="text" class="form-control" id="signupPhone" name="phone_num">
+      </div>
+      <button type="submit" class="btn btn-primary">회원가입</button>
+    </form>
+  </div>
+
+  <!-- AJAX를 이용한 회원가입 폼 제출 처리 -->
+  <script>
+    $(document).ready(function(){
+      $("#signupForm").submit(function(event){
+        event.preventDefault();  // 폼 기본 제출 막기
+        $.ajax({
+          url: "{% url 'signup' %}",
+          type: "POST",
+          data: $(this).serialize(),
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          success: function(response){
+            if(response.status === "success"){
+              alert(response.message);
+              // 회원가입 성공 시 메인 페이지로 이동
+              window.location.href = "{% url 'main_page' %}";
+            }
+          },
+          error: function(xhr){
+            alert("오류: " + xhr.responseJSON.message);
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- Bootstrap JS (CDN 사용) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>여행 플래너 - 메인페이지</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">여행 플래너</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" href="#">이용방법</a></li>
+            <!-- 검색 메뉴를 새 검색 페이지로 연결 -->
+            <li class="nav-item"><a class="nav-link" href="{% url 'search' %}">검색</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'board_list' %}">게시판</a></li>
+            {% if request.session.user_email %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'my_page' %}">마이페이지</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">로그아웃</a></li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">회원가입</a></li>
+              <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">로그인</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 캐러셀 영역 (Bootstrap Carousel 사용) -->
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-indicators">
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"></button>
+      </div>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="/static/images/slide1.jpg" class="d-block w-100" alt="Slide 1">
+        </div>
+        <div class="carousel-item">
+          <img src="/static/images/slide2.jpg" class="d-block w-100" alt="Slide 2">
+        </div>
+        <div class="carousel-item">
+          <img src="/static/images/slide3.jpg" class="d-block w-100" alt="Slide 3">
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+
+    <!-- 로그인 모달 창 -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="loginForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="loginModalLabel">로그인</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="loginEmail" class="form-label">이메일</label>
+                <input type="email" class="form-control" id="loginEmail" name="email" required>
+              </div>
+              <div class="mb-3">
+                <label for="loginPassword" class="form-label">비밀번호</label>
+                <input type="password" class="form-control" id="loginPassword" name="password" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">로그인</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery (CDN) - AJAX 요청을 위해 사용 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS (CDN 사용) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 로그인 폼 처리 스크립트 -->
+    <script>
+      $(document).ready(function(){
+        $("#loginForm").submit(function(event){
+          event.preventDefault(); // 기본 폼 제출 막기
+          var formData = $(this).serialize();
+          $.ajax({
+            url: "{% url 'login' %}",
+            type: "POST",
+            data: formData,
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}"
+            },
+            success: function(response){
+              if(response.status === "success"){
+                alert("로그인 성공: " + response.user_name);
+                // 필요 시, 헤더 업데이트 등 추가 작업 수행 후 페이지 새로고침
+                location.reload();
+              }
+            },
+            error: function(xhr, status, error){
+              alert("로그인 실패: " + xhr.responseJSON.message);
+            }
+          });
+        });
+      });
+    </script>
+</body>
+</html>
