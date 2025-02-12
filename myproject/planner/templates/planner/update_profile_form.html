@@ -1,0 +1,43 @@
+{% load static %}
+<!-- 회원정보 수정 폼 (부분 템플릿) -->
+<div class="container mt-5 position-relative">
+  <h2>회원정보 수정</h2>
+  <form id="updateProfileForm" method="post">
+    {% csrf_token %}
+    <!-- 이름 -->
+    <div class="mb-3">
+      <label for="name" class="form-label">이름</label>
+      <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+    </div>
+    <!-- 생년월일 -->
+    <div class="mb-3">
+      <label for="birth" class="form-label">생년월일</label>
+      <input type="date" class="form-control" id="birth" name="birth" value="{{ user.birth|date:'Y-m-d' }}" required>
+    </div>
+    <!-- 주소 -->
+    <div class="mb-3">
+      <label for="addr" class="form-label">주소</label>
+      <input type="text" class="form-control" id="addr" name="addr" value="{{ user.addr }}" required>
+    </div>
+    <!-- 전화번호 -->
+    <div class="mb-3">
+      <label for="phone_num" class="form-label">전화번호</label>
+      <input type="text" class="form-control" id="phone_num" name="phone_num" value="{{ user.phone_num }}" required>
+    </div>
+    <!-- 새 비밀번호 입력 (선택적) -->
+    <div class="mb-3">
+      <label for="new_password" class="form-label">새 비밀번호 (변경 시)</label>
+      <input type="password" class="form-control" id="new_password" name="new_password">
+      <div id="newPasswordError" class="error-message">새 비밀번호는 8~16자 영문 대소문자, 숫자, 특수문자를 포함해야 합니다.</div>
+    </div>
+    <!-- 새 비밀번호 재확인 입력 -->
+    <div class="mb-3">
+      <label for="new_password_confirm" class="form-label">새 비밀번호 재확인</label>
+      <input type="password" class="form-control" id="new_password_confirm" name="new_password_confirm">
+      <div id="newPasswordMismatch" class="error-message">새 비밀번호가 일치하지 않습니다.</div>
+    </div>
+    <button type="submit" class="btn btn-primary">수정</button>
+  </form>
+</div>
+
+<!-- update_profile.css와 AJAX 스크립트는 이미 별도 파일 또는 인라인 스크립트로 관리 -->
