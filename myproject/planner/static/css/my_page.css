@@ -1,69 +1,193 @@
-/* 전체 배경 살짝 색상 */
+/* 항상 세로 스크롤바를 표시하여 레이아웃 이동 방지 */
+html {
+  overflow-y: scroll; /* 항상 세로 스크롤바 표시 */
+}
+/* info-wrapper: 기본 정보 섹션 스타일 */
+.info-wrapper {
+  font-family: 'Arial', sans-serif;
+  background-color: #f9f9f9;
+  padding: 20px;
+  margin: 0 auto;                   /* 가로 가운데 정렬 */
+  max-width: 600px;                 /* update_profile와 동일한 최대 너비 */
+  border: 1px solid #ddd;       /*(선택) 테두리 추가로 박스처럼 보이게 할 수도 있음 */
+  border-radius : 10px;
+}
+
+.info-wrapper h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.info-wrapper p {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+/* delete-wrapper: 회원 탈퇴 섹션 스타일 */
+.delete-wrapper{
+  font-family: 'Arial', sans-serif;
+  background-color: #ffffff;
+  padding: 20px;
+  margin: 0 auto;                   /* 가로 가운데 정렬 */
+  max-width: 600px;                 /* update_profile와 동일한 최대 너비 */
+  border: 1px solid #ddd;
+  border-radius : 10px;
+}
+
+.delete-wrapper h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.delete-wrapper p {
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+/* "삭제된 데이터는 복구되지 않습니다." 부분만 빨간색 */
+.delete-wrapper .delete-warning {
+  color: red;
+  text-decoration: underline;
+}
+.btn-danger{
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  background: #d9534f;
+  border: none;
+  border-radius: 5px;
+  transition: background 0.3s ease-in-out;
+}
+.btn-danger:hover{
+     background: #c9302c;
+}
+/* Global 스타일 */
 body {
-    background-color: #f8f9fa;
-    font-family: 'Helvetica', 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-  }
+  overflow: hidden; /* 바디 스크롤 없음 */
+  font-family: 'Helvetica', 'Arial', sans-serif;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+body.modal-open {
+  padding-right: 0 !important;
+}
+/* 헤더 & 푸터 (메인페이지 스타일 발췌) */
+.navbar {
+  margin-bottom: 50px;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #0056b3;
+}
+.navbar-nav .nav-link {
+  font-size: 16px;
+  color: #333 !important;
+}
+footer {
+  background-color: rgb(218,218,218);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 10px 0;
+  text-align: center;
+}
 
-  /* 컨테이너 안쪽 배경과 테두리 */
-  .container {
-    background-color: #fff;
-    border: 1px solid #eee;
-    padding: 20px;
-    margin-top: 30px;
-    max-width: 1200px; /* 필요 시 조절 */
-  }
+/* 드롭다운 메뉴 z-index 보강 */
+.dropdown-menu {
+  z-index: 2000;
+}
 
-  /* 사이드 메뉴 영역 */
-  .side-nav {
-    border-right: 1px solid #ddd;
-    padding-right: 0; /* Bootstrap 기본 padding 제거 */
-    min-height: 600px; /* 원하는 높이만큼 지정 */
-  }
+/* 고정 레이아웃 */
+.fixed-container {
+  width: 1200px;           /* 내부 고정폭 */
+  margin: 0 auto;
+  height: 90vh;            /* 브라우저 높이의 90% */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.fixed-header {
+  height: 50px;
+  flex-shrink: 0;
+}
+.fixed-header h2 {
+  margin: 0;
+  line-height: 50px;
+  font-weight: bold;       /* 제목을 두껍게 */
+}
+.fixed-content {
+  flex: 1;
+  display: flex;
+  overflow: auto;  /* overflow hidden → auto로 변경 */
+}
+/* 스크롤바 숨기기 (fixed-content 영역) */
+/* Chrome, Safari, Opera */
+.fixed-content::-webkit-scrollbar {
+    display: none;
+}
+/* IE, Edge, Firefox */
+.fixed-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+/* 사이드 메뉴 스타일 */
+.side-nav {
+  border-right: 1px solid #ddd;
+  padding-right: 20px;
+  height: 100%;
+  margin-top: 20px;  /* '마이페이지'와 '내 정보' 사이의 간격 */
+}
+.side-nav-title {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #0056b3;
+}
+.side-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.side-nav ul li a {
+  display: block;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: #495057;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
+}
+.side-nav ul li a.active,
+.side-nav ul li a:hover {
+  background-color: #f2f2f2;
+  color: #000;
+}
 
-  /* 사이드 메뉴 제목 */
-  .side-nav-title {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
-  }
+/* 본문 영역 스타일 */
+.main-content {
+  padding: 20px;
+  overflow-y: auto;
+}
+/* 스크롤바 숨기기 (main-content 영역) */
+/* Chrome, Safari, Opera */
+.main-content::-webkit-scrollbar {
+    display: none;
+}
+/* IE, Edge, Firefox */
+.main-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
 
-  /* 사이드 메뉴 리스트 */
-  .side-nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  /* 사이드 메뉴 링크 공통 스타일 */
-  .side-nav ul li a {
-    display: block;
-    padding: 10px 16px;
-    text-decoration: none;
-    color: #495057;
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.2s ease;
-  }
-
-  /* 선택(활성화)된 메뉴 항목이나 호버 시 효과 */
-  .side-nav ul li a.active,
-  .side-nav ul li a:hover {
-    background-color: #f2f2f2;
-    color: #000;
-  }
-
-  /* 오른쪽 본문 영역 */
-  .main-content {
-    padding: 20px;
-  }
-
-  /* 본문 내 섹션 구분 */
-  .main-content section {
-    margin-bottom: 2rem;
-  }
-
-  /* 버튼 간격 */
-  .btn {
-    margin-right: 0.5rem;
-  }
+/* 업데이트 폼 컨테이너: 너비를 600px로 제한하고 중앙 정렬 */
+#updateProfileContainer {
+  max-width: 600px;
+  margin: 0 auto;
+}

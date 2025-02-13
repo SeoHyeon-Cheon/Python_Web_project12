@@ -4,87 +4,317 @@
 <head>
   <meta charset="UTF-8">
   <title>마이페이지 - 여행 플래너</title>
+  <!-- Bootstrap CSS (CDN) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{% static 'css/my_page.css' %}" rel="stylesheet">
-  <!-- ↑ 위 링크는 Django static 연결 예시입니다. 상황에 맞게 수정하세요. -->
+  <!-- 마이페이지 전용 CSS -->
+  <link rel="stylesheet" href="{% static 'css/my_page.css' %}">
+  <!-- update_profile.css는 update_profile.html 내부에서 적용되도록 update_profile.html에 적용하거나, 필요시 부모에도 포함 -->
+  <link rel="stylesheet" href="{% static 'css/update_profile.css' %}">
 </head>
 <body>
-<div class="container mt-5">
-  <!-- 상단 로고, 제목 등 -->
-  <h2>마이페이지</h2>
-
-  <!-- 메인 레이아웃(row) 잡기 -->
-  <div class="row">
-    <!-- 왼쪽 사이드 메뉴 -->
-    <div class="col-3 side-nav">
-      <h4 class="side-nav-title">내 정보</h4>
-      <ul class="list-unstyled">
-        <li><a href="#basic-info" class="active" onclick="showSection('basic-info'); return false;">기본 정보</a></li>
-        <li><a href="#update" onclick="showSection('update'); return false;">회원 정보 수정</a></li>
-        <li><a href="#delete" onclick="showSection('leave'); return false;">회원탈퇴</a></li>
-      </ul>
+  <!-- 헤더 (메인페이지 nav 영역 복사) -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <!-- 브랜드(왼쪽) -->
+      <a class="navbar-brand" href="{% url 'main_page' %}">여행 플래너</a>
+      <!-- 토글 버튼 -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarNav" aria-controls="navbarNav"
+              aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <!-- 메뉴 항목 -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#">이용방법</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'board_list' %}">게시판</a>
+          </li>
+          {% if request.session.user_email %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                {{ request.session.user_name }}님
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" href="{% url 'my_page' %}">마이페이지</a></li>
+                <li><a class="dropdown-item" href="{% url 'logout' %}">로그아웃</a></li>
+              </ul>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">로그인</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
-    
-    <!-- 오른쪽 본문 영역 -->
-    <div class="col-9 main-content">
-      <!-- 예: 회원 정보 섹션 -->
-      <section id="basic-info">
-        <h3>기본 정보</h3>
-        <p>이메일: {{ user.email }}</p>
-        <p>이름: {{ user.name }}</p>
-        <p>생년월일: {{ user.birth }}</p>
-        <p>주소: {{ user.addr }}</p>
-        <p>전화번호: {{ user.phone_num }}</p>
-      </section>
+  </nav>
 
-      <!-- 회원 정보 수정 섹션 (AJAX로 업데이트 폼 로드) -->
-      <section id="update" style="display: none;">
-        <div id="updateProfileContainer">
-          <!-- update_profile.html(또는 부분 템플릿)의 내용이 여기 로드됩니다 -->
+  <!-- 마이페이지 콘텐츠 영역 (고정폭/고정높이 레이아웃) -->
+  <div class="container-fluid mt-5">
+    <div class="fixed-container">
+      <!-- 상단 제목 영역 -->
+      <div class="fixed-header">
+        <h2>마이페이지</h2>
+      </div>
+      <!-- 좌우 내용 영역 -->
+      <div class="fixed-content">
+        <!-- 왼쪽 사이드 메뉴 (고정폭 300px) -->
+        <div class="side-nav" style="width:300px;">
+          <h4 class="side-nav-title">내 정보</h4>
+          <ul class="list-unstyled">
+            <li>
+              <a href="#basic-info" onclick="showSection('basic-info', event); return false;" class="active">
+                기본 정보
+              </a>
+            </li>
+              <!-- 새로 추가하는 "나의 일정" 메뉴 -->
+            <li>
+              <a href="#my-plan" onclick="showSection('my-plan', event); return false;">
+                나의 일정
+              </a>
+            </li>
+            <li>
+              <a href="#update" onclick="showSection('update', event); return false;">
+                회원 정보 수정
+              </a>
+            </li>
+            <li>
+              <a href="#delete" onclick="showSection('delete', event); return false;">
+                회원탈퇴
+              </a>
+            </li>
+          </ul>
         </div>
-      </section>
+        <!-- 오른쪽 본문 영역 (고정폭 900px) -->
+        <div class="main-content" style="width:900px;">
+          <section id="basic-info">
+            <div class="info-wrapper">
+            <h3>기본 정보</h3>
+            <p>이메일: {{ user.email }}</p>
+            <p>이름: {{ user.name }}</p>
+            <p>생년월일: {{ user.birth }}</p>
+            <p>주소: {{ user.addr }}</p>
+            <p>전화번호: {{ user.phone_num }}</p>
+            </div>
+          </section>
 
-      <!-- 회원탈퇴 섹션 (예시) -->
-      <section id="delete" style="display: none;">
+        <!-- '나의 일정' 섹션 -->
+        <section id="my-plan" style="display:none;">
+          <h3>나의 일정</h3>
 
-      </section>
+          {% comment %}
+            다가올 일정과 지난 일정이 모두 비어 있으면 일정이 없음
+          {% endcomment %}
+          {% if upcoming_plans|length == 0 and past_plans|length == 0 %}
+            <p>등록된 여행 일정이 없습니다.</p>
+            <!-- 일정 만들기 버튼 (plan_schedule 뷰로 이동) -->
+            <a href="{% url 'plan_schedule' %}" class="btn btn-primary">일정 만들기</a>
 
-      <br>
-      <a href="{% url 'main_page' %}" class="btn btn-secondary">홈으로</a>
+          {% else %}
+            <!-- 다가올 일정 -->
+            <h4>다가올 여행 일정</h4>
+            {% if upcoming_plans|length == 0 %}
+              <p>다가올 여행 일정이 없습니다.</p>
+            {% else %}
+              {% for plan in upcoming_plans %}
+                <!-- 각 Plan을 표시 -->
+                <div class="plan-item mb-4 p-3" style="background-color:#f8f9fa; border-radius:5px;">
+                  <!-- 일정 제목(예: plan.travel_title)과 날짜 -->
+                  <h5>{{ plan.plan_no }} / {{ plan.region }}</h5>
+                  <p>
+                    {{ plan.sdate|date:"Y년 n월 j일" }} ~
+                    {{ plan.edate|date:"Y년 n월 j일" }}
+                  </p>
+
+                  <!-- PlannerDetail 목록 표시 -->
+                  {% with details=plan.plannerdetail_set.all %}
+                    {% if details|length == 0 %}
+                      <p>이 일정에 담긴 여행지가 없습니다.</p>
+                    {% else %}
+                      <p>여행지 목록:</p>
+                      <ul>
+                        {% for detail in details %}
+                          <li>
+                            <!-- plan_name 파싱해서 DAY 구분,
+                                 detail.title는 Tourlist FK라고 가정 -->
+                            <strong>{{ detail.plan_name }}</strong>
+                            : {{ detail.title.title }}  <!-- 예: Tourlist의 title -->
+                            {% if detail.memo %}
+                              (메모: {{ detail.memo }})
+                            {% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              {% endfor %}
+            {% endif %}
+
+            <!-- 지난 일정 -->
+            <h4>지난 여행 일정</h4>
+            {% if past_plans|length == 0 %}
+              <p>지난 여행 일정이 없습니다.</p>
+            {% else %}
+              {% for plan in past_plans %}
+                <div class="plan-item mb-4 p-3" style="background-color:#f8f9fa; border-radius:5px;">
+                  <h5>{{ plan.plan_no }} / {{ plan.region }}</h5>
+                  <p>
+                    {{ plan.sdate|date:"Y년 n월 j일" }} ~
+                    {{ plan.edate|date:"Y년 n월 j일" }}
+                  </p>
+
+                  {% with details=plan.plannerdetail_set.all %}
+                    {% if details|length == 0 %}
+                      <p>이 일정에 담긴 여행지가 없습니다.</p>
+                    {% else %}
+                      <p>여행지 목록:</p>
+                      <ul>
+                        {% for detail in details %}
+                          <li>
+                            <strong>{{ detail.plan_name }}</strong>
+                            : {{ detail.title.title }}
+                            {% if detail.memo %}
+                              (메모: {{ detail.memo }})
+                            {% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              {% endfor %}
+            {% endif %}
+
+            <!-- 일정 만들기 버튼 (옵션) -->
+            <hr>
+            <a href="{% url 'plan_schedule' %}" class="btn btn-primary">새 일정 만들기</a>
+
+          {% endif %}
+        </section>
+
+          <!-- 회원 정보 수정 섹션 (AJAX로 업데이트 폼 로드) -->
+          <section id="update" style="display:none;">
+            <div id="updateProfileContainer">
+              <!-- update_profile.html 부분 템플릿이 AJAX로 로드됩니다 -->
+            </div>
+          </section>
+
+          <!-- 회원탈퇴 섹션 -->
+          <section id="delete" style="display:none;">
+            <div class="delete-wrapper">
+            <h3>회원 탈퇴</h3>
+            <h5>회원 탈퇴를 하기 전에 꼭 확인해 주세요.</h5>
+            <p>탈퇴 후 회원정보 및 이용기록이 모두 삭제 되며,
+              <br><span class="delete-warning">삭제된 데이터는 복구되지 않습니다.</span></p>
+            <a href="{% url 'delete_profile' %}" class="btn btn-danger">회원탈퇴</a>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
-  </div><!-- /.row -->
-</div><!-- /.container -->
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-function showSection(sectionId, event) {
-    // 모든 섹션 숨기기
-    document.querySelectorAll('.main-content section').forEach(sec => {
-      sec.style.display = 'none';
-    });
-    // 선택한 섹션 보이기
-    document.getElementById(sectionId).style.display = 'block';
+  <!-- 푸터 (메인페이지 footer 영역 복사) -->
+  <footer class="text-center py-3">
+    <p>&copy; 2025 여행 플래너</p>
+  </footer>
 
-    // 사이드 메뉴 활성화 처리
-    document.querySelectorAll('.side-nav a').forEach(link => {
-      link.classList.remove('active');
-    });
-    if (event && event.target) {
-      event.target.classList.add('active');
+  <!-- jQuery & Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // 섹션 전환 및 AJAX 업데이트 폼 로드 함수
+    function showSection(sectionId, event) {
+      // 모든 섹션 숨김
+      document.querySelectorAll('.main-content section').forEach(function(sec) {
+        sec.style.display = 'none';
+      });
+      // 선택한 섹션 보이기
+      var target = document.getElementById(sectionId);
+      if (target) {
+        target.style.display = 'block';
+      }
+
+      // 사이드 메뉴 활성화 처리
+      document.querySelectorAll('.side-nav a').forEach(function(link) {
+        link.classList.remove('active');
+      });
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
+
+      // 회원 정보 수정 섹션일 경우 AJAX로 update_profile.html 부분 템플릿 로드
+      if (sectionId === 'update') {
+        fetch("{% url 'update_profile' %}")
+          .then(response => response.text())
+          .then(html => {
+            document.getElementById('updateProfileContainer').innerHTML = html;
+            // 만약 update_profile.html 내부에 스크립트가 자동 실행되지 않는 경우,
+            // delegated 이벤트 또는 초기화 함수 initUpdateProfileJS()를 호출하세요.
+          })
+          .catch(error => {
+            console.error('업데이트 폼 로드 중 에러 발생:', error);
+          });
+      }
     }
 
-    // '회원 정보 수정' 섹션인 경우 AJAX로 업데이트 폼 로드
-    if (sectionId === 'update')
-    {fetch("{% url 'update_profile' %}")
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById('updateProfileContainer').innerHTML = html;
-        })
-        .catch(error => {
-          console.error('업데이트 폼 로드 중 에러 발생:', error);
-        });
-    }
-  }
-</script>
+    // Delegated event binding for 실시간 비밀번호 유효성 검사
+    $(document).on('keyup blur', '#new_password', function(){
+      var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,16}$/;
+      var newPassword = $(this).val();
+      if(newPassword.length > 0 && !passwordRegex.test(newPassword)){
+          $("#newPasswordError").text("새 비밀번호는 8~16자 영문 대소문자, 숫자, 특수문자를 포함해야 합니다.").show();
+      } else {
+          $("#newPasswordError").hide();
+      }
+    });
+
+    $(document).on('keyup blur', '#new_password_confirm', function(){
+      var newPassword = $('#new_password').val();
+      var confirmPassword = $(this).val();
+      if(confirmPassword.length > 0 && newPassword !== confirmPassword){
+          $("#newPasswordMismatch").text("새 비밀번호가 일치하지 않습니다.").show();
+      } else {
+          $("#newPasswordMismatch").hide();
+      }
+    });
+
+    // Delegated event binding for AJAX form submission (실시간 유효성 검증 포함)
+    $(document).on("submit", "#updateProfileForm", function(event) {
+      event.preventDefault();
+      var newPassword = $("#new_password").val();
+      var newPasswordConfirm = $("#new_password_confirm").val();
+      var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,16}$/;
+      if(newPassword || newPasswordConfirm) {
+        if(newPassword !== newPasswordConfirm) {
+          alert("새 비밀번호와 새 비밀번호 재확인이 일치하지 않습니다.");
+          return false;
+        }
+        if(!passwordRegex.test(newPassword)) {
+          alert("새 비밀번호는 8~16자 영문 대소문자, 숫자, 특수문자를 포함해야 합니다.");
+          return false;
+        }
+      }
+      $.ajax({
+        url: "{% url 'update_profile' %}",
+        type: "POST",
+        data: $(this).serialize(),
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        success: function(response) {
+          alert(response.message);
+          location.reload();
+        },
+        error: function(xhr) {
+          alert("오류: " + (xhr.responseJSON ? xhr.responseJSON.message : "알 수 없는 오류"));
+        }
+      });
+    });
+  </script>
 </body>
 </html>
