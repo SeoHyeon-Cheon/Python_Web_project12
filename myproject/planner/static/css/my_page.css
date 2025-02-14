@@ -25,6 +25,57 @@ html {
   color: #333;
   margin-bottom: 1rem;
 }
+
+/* schedule-wrapper: 나의 일정 섹션 스타일 */
+.schedule-wrapper {
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  margin: 0 auto;
+  max-width: 600px;
+  color: #333;
+  background-color: transparent;  /* 배경색 없음 */
+  border: 1px solid #ddd;
+  border-radius : 10px;
+}
+
+/* 제목, 부제 등 */
+.schedule-wrapper h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+.schedule-wrapper h5 {
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #0056b3;
+}
+.schedule-wrapper p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* 여행 일정 박스 -> 누르면 schedule_detail.html로 들어간다. */
+.plan-item{
+    background-color:#f8f9fa;
+    border-radius:5px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius : 10px;
+}
+
+.btn-primary{
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  background: #0057b3bf;
+  border: none;
+  border-radius: 5px;
+  transition: background 0.3s ease-in-out;
+}
+.btn-primary:hover{
+     background: #0056b3;
+}
 /* delete-wrapper: 회원 탈퇴 섹션 스타일 */
 .delete-wrapper{
   font-family: 'Arial', sans-serif;
@@ -169,8 +220,11 @@ footer {
   background-color: #f2f2f2;
   color: #000;
 }
-
+.coment{
+  margin-bottom: 10px;
+}
 /* 본문 영역 스타일 */
+}
 .main-content {
   padding: 20px;
   overflow-y: auto;
