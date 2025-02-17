@@ -8,8 +8,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- 마이페이지 전용 CSS -->
   <link rel="stylesheet" href="{% static 'css/my_page.css' %}">
-  <!-- update_profile.css는 update_profile.html 내부에서 적용되도록 update_profile.html에 적용하거나, 필요시 부모에도 포함 -->
+  <!-- update_profile.css는 update_profile.html 내부에서 적용되도록 하거나, 필요 시 부모에도 포함 -->
   <link rel="stylesheet" href="{% static 'css/update_profile.css' %}">
+
 </head>
 <body>
   <!-- 헤더 (메인페이지 nav 영역 복사) -->
@@ -67,11 +68,11 @@
           <h4 class="side-nav-title">내 정보</h4>
           <ul class="list-unstyled">
             <li>
+              <!-- 기본 정보 링크를 기본 활성화 -->
               <a href="#basic-info" onclick="showSection('basic-info', event); return false;" class="active">
                 기본 정보
               </a>
             </li>
-              <!-- 새로 추가하는 "나의 일정" 메뉴 -->
             <li>
               <a href="#my-plan" onclick="showSection('my-plan', event); return false;">
                 나의 일정
@@ -91,116 +92,78 @@
         </div>
         <!-- 오른쪽 본문 영역 (고정폭 900px) -->
         <div class="main-content" style="width:900px;">
-          <section id="basic-info">
+          <!-- 기본 정보: 처음에 표시 -->
+          <section id="basic-info" style="display:block;">
             <div class="info-wrapper">
-            <h3>기본 정보</h3>
-            <p>이메일: {{ user.email }}</p>
-            <p>이름: {{ user.name }}</p>
-            <p>생년월일: {{ user.birth }}</p>
-            <p>주소: {{ user.addr }}</p>
-            <p>전화번호: {{ user.phone_num }}</p>
+              <h3>기본 정보</h3>
+              <p>이메일: {{ user.email }}</p>
+              <p>이름: {{ user.name }}</p>
+              <p>생년월일: {{ user.birth }}</p>
+              <p>주소: {{ user.addr }}</p>
+              <p>전화번호: {{ user.phone_num }}</p>
             </div>
           </section>
 
-        <!-- '나의 일정' 섹션 -->
-        <section id="my-plan" style="display:none;">
-          <div class="schedule-wrapper">
-            <h3>나의 일정</h3>
-          {% comment %}
-            다가올 일정과 지난 일정이 모두 비어 있으면 일정이 없음
-          {% endcomment %}
-          {% if upcoming_plans|length == 0 and past_plans|length == 0 %}
-            <p>등록된 여행 일정이 없습니다.</p>
-            <!-- 일정 만들기 버튼 (plan_schedule 뷰로 이동) -->
-            <a href="{% url 'plan_schedule' %}" class="btn btn-primary">일정 만들기</a>
-
-          {% else %}
-            <!-- 다가올 일정 -->
-            <h5>다가올 여행 일정</h5>
-            {% if upcoming_plans|length == 0 %}
-              <p>다가올 여행 일정이 없습니다.</p>
-            {% else %}
-              {% for plan in upcoming_plans %}
-                <!-- 각 Plan을 표시 -->
-                <div class="plan-item mb-4 p-3"
-                      onclick="location.href='{% url 'schedule_detail' plan.plan_no %}'">
-                  <!-- 일정 제목(예: plan.travel_title)과 날짜 -->
-                  <h6><b>{{ plan.plan_no }} / {{ plan.region }}</b></h6>
-                  <p>
-                    {{ plan.sdate|date:"Y년 n월 j일" }} ~
-                    {{ plan.edate|date:"Y년 n월 j일" }}
-                  </p>
-
-                  <!-- PlannerDetail 목록 표시 -->
-                  {% with details=plan.plannerdetail_set.all %}
-                    {% if details|length == 0 %}
-                      <div class = "coment"><p>이 일정에 담긴 여행지가 없습니다.</p></div>
-                    {% else %}
-                      <p>여행지 목록:</p>
-                      <ul>
-                        {% for detail in details %}
-                          <li>
-                            <!-- plan_name 파싱해서 DAY 구분,
-                                 detail.title는 Tourlist FK라고 가정 -->
-                            <strong>{{ detail.plan_name }}</strong>
-                            : {{ detail.title.title }}  <!-- 예: Tourlist의 title -->
-                            {% if detail.memo %}
-                              (메모: {{ detail.memo }})
-                            {% endif %}
-                          </li>
-                        {% endfor %}
-                      </ul>
-                    {% endif %}
-                  {% endwith %}
+          <!-- '나의 일정' 섹션: 처음에는 숨김 -->
+          <section id="my-plan" style="display:none;">
+            <div class="schedule-wrapper">
+              <h3>나의 일정</h3>
+              {% if upcoming_plans|length == 0 and past_plans|length == 0 %}
+                <p>등록된 여행 일정이 없습니다.</p>
+                <a href="{% url 'plan_schedule' %}" class="btn btn-primary">일정 만들기</a>
+              {% else %}
+                <!-- 다가올 여행 일정 + 편집 버튼 같은 줄에 배치 -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="mb-0">다가올 여행 일정</h5>
+                  <!-- 편집 버튼 -->
+                  <button type="button" id="toggleEditMode" class="btn btn-warning btn-sm edit-mode-btn">편집</button>
                 </div>
-              {% endfor %}
-            {% endif %}
 
-            <!-- 지난 일정 -->
-            <h5>지난 여행 일정</h5>
-            {% if past_plans|length == 0 %}
-              <p >지난 여행 일정이 없습니다.</p>
-            {% else %}
-              {% for plan in past_plans %}
-                <div class="plan-item mb-4 p-3"
-                      onclick="location.href='{% url 'schedule_detail' plan.plan_no %}'">
-                  <h6><b>{{ plan.plan_no }} / {{ plan.region }}</b></h6>
-                  <p>
-                    {{ plan.sdate|date:"Y년 n월 j일" }} ~
-                    {{ plan.edate|date:"Y년 n월 j일" }}
-                  </p>
+                {% if upcoming_plans|length == 0 %}
+                  <p>다가올 여행 일정이 없습니다.</p>
+                {% else %}
+                  {% for plan in upcoming_plans %}
+                    <div class="schedule-item mb-4" data-plan-no="{{ plan.plan_no }}">
+                      <div class="schedule-info">
+                        <h6><b>{{ plan.travel_title }}</b></h6>
+                        <p>{{ plan.sdate|date:"Y년 n월 j일" }} ~ {{ plan.edate|date:"Y년 n월 j일" }}</p>
+<!--                        <p>{{ plan.region }}</p>-->
+                      </div>
+                      <!-- 수정/취소 버튼 (editMode가 true일 때만 .schedule-item.editable 적용) -->
+                      <div class="action-btns">
+                        <button type="button" class="btn btn-primary btn-sm edit-btn">수정</button>
+                        <button type="button" class="btn btn-danger btn-sm delete-btn">삭제</button>
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
 
-                  {% with details=plan.plannerdetail_set.all %}
-                    {% if details|length == 0 %}
-                      <p>이 일정에 담긴 여행지가 없습니다.</p>
-                    {% else %}
-                      <p>여행지 목록:</p>
-                      <ul>
-                        {% for detail in details %}
-                          <li>
-                            <strong>{{ detail.plan_name }}</strong>
-                            : {{ detail.title.title }}
-                            {% if detail.memo %}
-                              (메모: {{ detail.memo }})
-                            {% endif %}
-                          </li>
-                        {% endfor %}
-                      </ul>
-                    {% endif %}
-                  {% endwith %}
-                </div>
-              {% endfor %}
-            {% endif %}
+                <!-- 지난 일정 -->
+                <h5>지난 여행 일정</h5>
+                {% if past_plans|length == 0 %}
+                  <p>지난 여행 일정이 없습니다.</p>
+                {% else %}
+                  {% for plan in past_plans %}
+                    <div class="schedule-item mb-4" data-plan-no="{{ plan.plan_no }}">
+                      <div class="schedule-info">
+                        <h6><b>{{ plan.travel_title }}</b></h6>
+                        <p>{{ plan.sdate|date:"Y년 n월 j일" }} ~ {{ plan.edate|date:"Y년 n월 j일" }}</p>
+<!--                        <p>{{ plan.region }}</p>-->
+                      </div>
+                      <div class="action-btns">
+                        <button type="button" class="btn btn-primary btn-sm edit-btn">수정</button>
+                        <button type="button" class="btn btn-danger btn-sm delete-btn">취소</button>
+                      </div>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+                <hr>
+                <a href="{% url 'plan_schedule' %}" class="btn btn-primary">새 일정 만들기</a>
+              {% endif %}
+            </div>
+          </section>
 
-            <!-- 일정 만들기 버튼 (옵션) -->
-            <hr>
-            <a href="{% url 'plan_schedule' %}" class="btn btn-primary">새 일정 만들기</a>
-
-          {% endif %}
-          </div>
-        </section>
-
-          <!-- 회원 정보 수정 섹션 (AJAX로 업데이트 폼 로드) -->
+          <!-- 회원 정보 수정 섹션 -->
           <section id="update" style="display:none;">
             <div id="updateProfileContainer">
               <!-- update_profile.html 부분 템플릿이 AJAX로 로드됩니다 -->
@@ -210,34 +173,34 @@
           <!-- 회원탈퇴 섹션 -->
           <section id="delete" style="display:none;">
             <div class="delete-wrapper">
-            <h3>회원 탈퇴</h3>
-            <h5>회원 탈퇴를 하기 전에 꼭 확인해 주세요.</h5>
-            <p>탈퇴 후 회원정보 및 이용기록이 모두 삭제 되며,
-              <br><span class="delete-warning">삭제된 데이터는 복구되지 않습니다.</span></p>
-            <a href="{% url 'delete_profile' %}" class="btn btn-danger">회원탈퇴</a>
+              <h3>회원 탈퇴</h3>
+              <h5>회원 탈퇴를 하기 전에 꼭 확인해 주세요.</h5>
+              <p>탈퇴 후 회원정보 및 이용기록이 모두 삭제되며,
+                <br><span class="delete-warning">삭제된 데이터는 복구되지 않습니다.</span></p>
+              <a href="{% url 'delete_profile' %}" class="btn btn-danger">회원탈퇴</a>
             </div>
           </section>
         </div>
       </div>
     </div>
   </div>
+  <br>
+  <a href="{% url 'main_page' %}" class="btn btn-secondary">홈으로</a>
+
   <!-- jQuery & Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    // 섹션 전환 및 AJAX 업데이트 폼 로드 함수
     function showSection(sectionId, event) {
-      // 모든 섹션 숨김
-      document.querySelectorAll('.main-content section').forEach(function(sec) {
+      // 모든 섹션 숨기기
+      document.querySelectorAll('.fixed-content section').forEach(function(sec) {
         sec.style.display = 'none';
       });
-      // 선택한 섹션 보이기
+      // 클릭한 섹션만 보이기
       var target = document.getElementById(sectionId);
       if (target) {
         target.style.display = 'block';
       }
-
       // 사이드 메뉴 활성화 처리
       document.querySelectorAll('.side-nav a').forEach(function(link) {
         link.classList.remove('active');
@@ -245,70 +208,74 @@
       if (event && event.target) {
         event.target.classList.add('active');
       }
-
-      // 회원 정보 수정 섹션일 경우 AJAX로 update_profile.html 부분 템플릿 로드
+      // 회원 정보 수정 섹션이면 AJAX 폼 로드
       if (sectionId === 'update') {
         fetch("{% url 'update_profile' %}")
           .then(response => response.text())
           .then(html => {
             document.getElementById('updateProfileContainer').innerHTML = html;
-            // 만약 update_profile.html 내부에 스크립트가 자동 실행되지 않는 경우,
-            // delegated 이벤트 또는 초기화 함수 initUpdateProfileJS()를 호출하세요.
           })
-          .catch(error => {
-            console.error('업데이트 폼 로드 중 에러 발생:', error);
-          });
+          .catch(error => console.error('업데이트 폼 로드 중 에러:', error));
       }
     }
 
-    // Delegated event binding for 실시간 비밀번호 유효성 검사
-    $(document).on('keyup blur', '#new_password', function(){
-      var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,16}$/;
-      var newPassword = $(this).val();
-      if(newPassword.length > 0 && !passwordRegex.test(newPassword)){
-          $("#newPasswordError").text("새 비밀번호는 8~16자 영문 대소문자, 숫자, 특수문자를 포함해야 합니다.").show();
-      } else {
-          $("#newPasswordError").hide();
-      }
-    });
+    $(document).ready(function(){
+      var editMode = false;
 
-    $(document).on('keyup blur', '#new_password_confirm', function(){
-      var newPassword = $('#new_password').val();
-      var confirmPassword = $(this).val();
-      if(confirmPassword.length > 0 && newPassword !== confirmPassword){
-          $("#newPasswordMismatch").text("새 비밀번호가 일치하지 않습니다.").show();
-      } else {
-          $("#newPasswordMismatch").hide();
-      }
-    });
+      // "편집" 버튼 클릭 시 수정 모드 토글
+      $("#toggleEditMode").click(function(){
+        editMode = !editMode;
+        if(editMode){
+          $(this).text("편집 해제").removeClass("btn-warning").addClass("btn-success");
+          $(".schedule-item").addClass("editable");
+        } else {
+          $(this).text("편집").removeClass("btn-success").addClass("btn-warning");
+          $(".schedule-item").removeClass("editable");
+        }
+      });
 
-    // Delegated event binding for AJAX form submission (실시간 유효성 검증 포함)
-    $(document).on("submit", "#updateProfileForm", function(event) {
-      event.preventDefault();
-      var newPassword = $("#new_password").val();
-      var newPasswordConfirm = $("#new_password_confirm").val();
-      var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,16}$/;
-      if(newPassword || newPasswordConfirm) {
-        if(newPassword !== newPasswordConfirm) {
-          alert("새 비밀번호와 새 비밀번호 재확인이 일치하지 않습니다.");
-          return false;
+      // 수정 버튼
+      $(document).on('click', '.edit-btn', function(e){
+        e.stopPropagation();
+        var planNo = $(this).closest('.schedule-item').data('plan-no');
+        if(planNo) {
+          // 수정 모드로 이동할 때 쿼리 파라미터 전달
+          window.location.href = '/plan_schedule/?edit_plan=' + planNo;
+        } else {
+          alert("일정 번호를 찾을 수 없습니다.");
         }
-        if(!passwordRegex.test(newPassword)) {
-          alert("새 비밀번호는 8~16자 영문 대소문자, 숫자, 특수문자를 포함해야 합니다.");
-          return false;
+      });
+
+      // 취소(삭제) 버튼
+      $(document).on('click', '.delete-btn', function(e){
+        e.stopPropagation();
+        var planItem = $(this).closest(".schedule-item");
+        var planNo = planItem.data("plan-no");
+        if(confirm("정말 삭제하시겠습니까?")){
+          $.ajax({
+            url: "/schedule/" + planNo + "/delete/",
+            type: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            success: function(response){
+              if(response.status === "success"){
+                alert(response.message);
+                planItem.remove();
+              } else {
+                alert(response.message);
+              }
+            },
+            error: function(xhr){
+              alert("삭제 중 오류 발생: " + (xhr.responseJSON ? xhr.responseJSON.message : "오류"));
+            }
+          });
         }
-      }
-      $.ajax({
-        url: "{% url 'update_profile' %}",
-        type: "POST",
-        data: $(this).serialize(),
-        headers: { "X-CSRFToken": "{{ csrf_token }}" },
-        success: function(response) {
-          alert(response.message);
-          location.reload();
-        },
-        error: function(xhr) {
-          alert("오류: " + (xhr.responseJSON ? xhr.responseJSON.message : "알 수 없는 오류"));
+      });
+
+      // 일정 박스를 클릭하면 상세 보기(단, 편집 모드가 아닐 때만)
+      $(".schedule-item").click(function(){
+        if(!editMode){
+          var planNo = $(this).data("plan-no");
+          window.location.href = "/schedule/" + planNo + "/";
         }
       });
     });
