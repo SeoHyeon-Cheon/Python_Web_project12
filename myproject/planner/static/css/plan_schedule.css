@@ -82,7 +82,11 @@
   margin-right: 5px;
   flex-shrink: 0;
 }
-
+/* 추천 장소 영역 높이 */
+.py-1 {
+    padding-top: .18rem !important;
+    padding-bottom: .25rem !important;
+}
 /* 버튼 스타일 */
 .btn-primary {
   margin-top: 10px;
@@ -94,6 +98,16 @@
 .custom-close {
   margin-top: 10px;
 }
+/* 이전&다음버튼 위치 */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
  /* 드롭다운 메뉴 기본 스타일은 Bootstrap 기본 스타일 사용 */
 /* 메인 콘텐츠 영역 */
 .main-container {
@@ -196,7 +210,6 @@
 /* 지도 영역의 검색 그룹 조정 */
 .map-container .d-flex.mb-2 {
   display: flex;
-
   border-radius: 4px !important;
 }
 #travelSearchInput {
@@ -215,7 +228,7 @@
   background-color: #fff;
   border: 1px solid #dee2e6;
   border-radius: 5px;
-  padding: 15px;
+  padding: 22px !important;
   min-height: 400px;
 }
 #map {
@@ -241,3 +254,4 @@
     margin-bottom: 15px;
   }
 }
+
